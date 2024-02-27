@@ -28,9 +28,7 @@ var CloudConfigTemplate = `#!/bin/bash
 set -e
 set -o pipefail
 
-{{- if .EnableBootDebug }}
 set -x
-{{- end }}
 
 CALLBACK_URL="{{ .CallbackURL }}"
 METADATA_URL="{{ .MetadataURL }}"
@@ -44,7 +42,7 @@ fi
 function call() {
 	PAYLOAD="$1"
 	[[ $CALLBACK_URL =~ ^(.*)/status(/)?$ ]] || CALLBACK_URL="${CALLBACK_URL}/status"
-	curl --retry 5 --retry-delay 5 --retry-connrefused --fail -s -X POST -d "${PAYLOAD}" -H 'Accept: application/json' -H "Authorization: Bearer ${BEARER_TOKEN}" "${CALLBACK_URL}" || echo "failed to call home: exit code ($?)"
+	curl -k --retry 5 --retry-delay 5 --retry-connrefused --fail -s -X POST -d "${PAYLOAD}" -H 'Accept: application/json' -H "Authorization: Bearer ${BEARER_TOKEN}" "${CALLBACK_URL}" || echo "failed to call home: exit code ($?)"
 }
 
 function sendStatus() {
@@ -104,7 +102,7 @@ function downloadAndExtractRunner() {
 	if [ ! -z "{{ .TempDownloadToken }}" ]; then
 	TEMP_TOKEN="Authorization: Bearer {{ .TempDownloadToken }}"
 	fi
-	curl --retry 5 --retry-delay 5 --retry-connrefused --fail -L -H "${TEMP_TOKEN}" -o "/home/{{ .RunnerUsername }}/{{ .FileName }}" "{{ .DownloadURL }}" || fail "failed to download tools"
+	curl -k --retry 5 --retry-delay 5 --retry-connrefused --fail -L -H "${TEMP_TOKEN}" -o "/home/{{ .RunnerUsername }}/{{ .FileName }}" "{{ .DownloadURL }}" || fail "failed to download tools"
 	mkdir -p /home/{{ .RunnerUsername }}/actions-runner || fail "failed to create actions-runner folder"
 	sendStatus "extracting runner"
 	tar xf "/home/{{ .RunnerUsername }}/{{ .FileName }}" -C /home/{{ .RunnerUsername }}/actions-runner/ || fail "failed to extract runner"
@@ -128,7 +126,7 @@ fi
 sendStatus "configuring runner"
 {{- if .UseJITConfig }}
 function getRunnerFile() {
-	curl --retry 5 --retry-delay 5 \
+	curl -k --retry 5 --retry-delay 5 \
 		--retry-connrefused --fail -s \
 		-X GET -H 'Accept: application/json' \
 		-H "Authorization: Bearer ${BEARER_TOKEN}" \
@@ -155,7 +153,7 @@ sudo systemctl daemon-reload || fail "failed to reload systemd"
 sudo systemctl enable $SVC_NAME
 {{- else}}
 
-GITHUB_TOKEN=$(curl --retry 5 --retry-delay 5 --retry-connrefused --fail -s -X GET -H 'Accept: application/json' -H "Authorization: Bearer ${BEARER_TOKEN}" "${METADATA_URL}/runner-registration-token/")
+GITHUB_TOKEN=$(curl -k --retry 5 --retry-delay 5 --retry-connrefused --fail -s -X GET -H 'Accept: application/json' -H "Authorization: Bearer ${BEARER_TOKEN}" "${METADATA_URL}/runner-registration-token/")
 
 set +e
 attempt=1
