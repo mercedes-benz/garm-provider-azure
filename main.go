@@ -16,6 +16,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -32,7 +33,19 @@ var signals = []os.Signal{
 	syscall.SIGTERM,
 }
 
+// Version is the version of the provider.
+// Should be set at build time via '-ldflags "-X main.Version=<version>"'
+var Version = "undefined"
+
 func main() {
+
+	printVersion := flag.Bool("version", false, "Prints the version of the provider")
+	flag.Parse()
+
+	if printVersion != nil && *printVersion {
+		fmt.Println(Version)
+	}
+	
 	ctx, stop := signal.NotifyContext(context.Background(), signals...)
 	defer stop()
 
