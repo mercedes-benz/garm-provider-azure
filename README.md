@@ -164,6 +164,10 @@ To this end, this provider supports the following extra specs schema:
         "disable_isolated_networks": {
             "type": "boolean",
             "description": "Disable network isolation for the VM."
+        },
+        "disable_updates_on_boot": {
+            "type": "boolean",
+            "description": "Disable updates on boot for the VM."
         }
     }
 }

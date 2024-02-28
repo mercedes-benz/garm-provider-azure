@@ -85,6 +85,7 @@ type extraSpecs struct {
 	UseAcceleratedNetworking *bool                                     `json:"use_accelerated_networking"`
 	VnetSubnetID             string                                    `json:"vnet_subnet_id"`
 	DisableIsolatedNetworks  *bool                                     `json:"disable_isolated_networks"`
+	DisableUpdatesOnBoot     *bool                                     `json:"disable_updates_on_boot"`
 }
 
 func (e *extraSpecs) cleanInboundPorts() {
@@ -167,6 +168,14 @@ func GetRunnerSpecFromBootstrapParams(data params.BootstrapInstance, controllerI
 
 	for name, val := range extraSpecs.ExtraTags {
 		tags[name] = to.Ptr(val)
+	}
+
+	if cfg.DisableUpdatesOnBoot {
+		data.UserDataOptions.DisableUpdatesOnBoot = true
+	}
+
+	if extraSpecs.DisableUpdatesOnBoot != nil {
+		data.UserDataOptions.DisableUpdatesOnBoot = *extraSpecs.DisableUpdatesOnBoot
 	}
 
 	spec := &RunnerSpec{
