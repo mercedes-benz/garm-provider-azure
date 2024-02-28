@@ -50,6 +50,7 @@ type Config struct {
 	UseAcceleratedNetworking bool   `toml:"use_accelerated_networking"`
 	VnetSubnetID             string `toml:"vnet_subnet_id"`
 	DisableIsolatedNetworks  bool   `toml:"disable_isolated_networks"`
+	DisableUpdatesOnBoot     bool   `toml:"disable_updates_on_boot"`
 }
 
 func (c *Config) Validate() error {
