@@ -509,6 +509,8 @@ func (r RunnerSpec) GetNewVMProperties(networkInterfaceID string, sizeSpec VMSiz
 			},
 		},
 		SecurityProfile: securityProfile,
+		Priority: 	  to.Ptr(armcompute.VirtualMachinePriorityTypesSpot),
+		EvictionPolicy: to.Ptr(armcompute.VirtualMachineEvictionPolicyTypesDelete),
 	}
 
 	if r.BootstrapParams.OSType == params.Linux {
