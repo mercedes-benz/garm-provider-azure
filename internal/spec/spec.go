@@ -186,6 +186,7 @@ type extraSpecs struct {
 	DisableIsolatedNetworks  *bool                                     `json:"disable_isolated_networks"`
 	DisableUpdatesOnBoot     *bool                                     `json:"disable_updates_on_boot"`
 	EnableBootDebug          *bool                                     `json:"enable_boot_debug"`
+	UseSpot                  bool                                      `json:"use_spot"`
 }
 
 func (e *extraSpecs) cleanInboundPorts() {
@@ -299,6 +300,7 @@ func GetRunnerSpecFromBootstrapParams(data params.BootstrapInstance, controllerI
 		UseAcceleratedNetworking: cfg.UseAcceleratedNetworking,
 		VnetSubnetID:             cfg.VnetSubnetID,
 		DisableIsolatedNetworks:  cfg.DisableIsolatedNetworks,
+		UseSpot:                  extraSpecs.UseSpot,
 	}
 
 	if extraSpecs.UseEphemeralStorage != nil {
@@ -345,6 +347,7 @@ type RunnerSpec struct {
 	UseAcceleratedNetworking bool
 	VnetSubnetID             string
 	DisableIsolatedNetworks  bool
+	UseSpot                  bool
 }
 
 func (r RunnerSpec) Validate() error {
@@ -608,8 +611,11 @@ func (r RunnerSpec) GetNewVMProperties(networkInterfaceID string, sizeSpec VMSiz
 			},
 		},
 		SecurityProfile: securityProfile,
-		Priority: 	  to.Ptr(armcompute.VirtualMachinePriorityTypesSpot),
-		EvictionPolicy: to.Ptr(armcompute.VirtualMachineEvictionPolicyTypesDelete),
+	}
+
+	if r.UseSpot {
+		properties.Priority = to.Ptr(armcompute.VirtualMachinePriorityTypesSpot)
+		properties.EvictionPolicy = to.Ptr(armcompute.VirtualMachineEvictionPolicyTypesDelete)
 	}
 
 	if r.BootstrapParams.OSType == params.Linux {
