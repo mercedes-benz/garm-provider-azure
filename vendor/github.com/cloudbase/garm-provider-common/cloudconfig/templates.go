@@ -119,8 +119,6 @@ if [ -z "$CACHED_RUNNER" ];then
 	sudo ./bin/installdependencies.sh || fail "failed to install dependencies"
 else
 	sendStatus "using cached runner found in $CACHED_RUNNER"
-	sudo cp -a "$CACHED_RUNNER"  "/home/{{ .RunnerUsername }}/actions-runner"
-	sudo chown {{ .RunnerUsername }}:{{ .RunnerGroup }} -R "/home/{{ .RunnerUsername }}/actions-runner" || fail "failed to change owner"
 	cd /home/{{ .RunnerUsername }}/actions-runner
 fi
 
