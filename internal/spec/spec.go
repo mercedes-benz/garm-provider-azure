@@ -119,6 +119,22 @@ const (
 				"disable_isolated_networks": {
 					"type": "boolean",
 					"description": "Disable network isolation for the VM."
+				},
+				"enable_boot_debug": {
+					"type": "boolean",
+					"description": "Enable boot debug for the VM."
+				},
+				"disable_updates_on_boot": {
+					"type": "boolean",
+					"description": "Disable updates on boot for the VM."
+				},
+				"garm_image_type": {
+					"type": "string",
+					"description": "The type of image to use for the VM. This is used to determine the image to use for the VM."
+				},
+				"use_spot": {
+					"type": "boolean",
+					"description": "Use spot pricing for the VM."
 				}
 			},
 			"additionalProperties": false
