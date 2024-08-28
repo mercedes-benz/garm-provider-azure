@@ -110,6 +110,7 @@ function getCachedToolsPath() {
 	return 0
 }
 
+{{- if ne .ExtraContext.SkipInstallRunnerBinary "true"}}
 function downloadAndExtractRunner() {
 	sendStatus "downloading tools from {{ .DownloadURL }}"
 	if [ ! -z "{{ .TempDownloadToken }}" ]; then
@@ -126,22 +127,24 @@ CACHED_RUNNER=$(getCachedToolsPath)
 if [ -z "$CACHED_RUNNER" ];then
 	downloadAndExtractRunner
 	sendStatus "installing dependencies"
-	cd /home/{{ .RunnerUsername }}/actions-runner
 	sudo ./bin/installdependencies.sh || fail "failed to install dependencies"
 else
 	sendStatus "using cached runner found in $CACHED_RUNNER"
 	OFS_AVAIL=1
-	RUN_HOME="/home/{{ .RunnerUsername }}/actions-runner"
+	RUN_HOME="/home/{{ .RunnerUsername }}"
 	sudo mkdir -p $OFS_DIR/upper-layer $OFS_DIR/work-layer $RUN_HOME
-	sudo chown {{ .RunnerUsername }}:{{ .RunnerGroup }} -R $OFS_DIR/upper-layer $OFS_DIR/work-layer $CACHED_RUNNER $RUN_HOME
+	sudo chown {{ .RunnerUsername }}:{{ .RunnerGroup }} $OFS_DIR/upper-layer $OFS_DIR/work-layer $RUN_HOME
+	sudo chown {{ .RunnerUsername }}:{{ .RunnerGroup }} -R $CACHED_RUNNER
 	sudo mount -t overlay overlay -o lowerdir=$CACHED_RUNNER,upperdir=$OFS_DIR/upper-layer,workdir=$OFS_DIR/work-layer $RUN_HOME || OFS_AVAIL=0
 	if [ $OFS_AVAIL -eq 0 ];then
 		sendStatus "falling back to non-overlayfs mode"
 		sudo cp -a "$CACHED_RUNNER/." $RUN_HOME || fail "failed to copy cached runner"
 		sudo chown {{ .RunnerUsername }}:{{ .RunnerGroup }} -R "$RUN_HOME" || fail "failed to change owner"
 	fi
-	cd /home/{{ .RunnerUsername }}/actions-runner
 fi
+{{- end}}
+
+cd /home/{{ .RunnerUsername }}/actions-runner
 
 
 sendStatus "configuring runner"
